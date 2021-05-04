@@ -74,14 +74,19 @@ public class Client {
   String user;
   String host;
   int port;
-
+  String state;
+  private CLFormatter helper;
+  private BufferedReader reader;
   boolean printSplash = true;
 
   Client(String user, String host, int port) 
   {
-      this.user = user;
-      this.host = host;
-      this.port = port;
+    this.user = user;
+    this.host = host;
+    this.port = port;
+    state = "";
+    BufferedReader reader = null;
+    CLFormatter helper = null;
   }
 
   public static void main(String[] args) throws IOException {
@@ -97,8 +102,6 @@ public class Client {
       justification = "When reading console, ignore 'default encoding' warning")
   void run() throws IOException {
 
-    BufferedReader reader = null;
-    CLFormatter helper = null;
     try {
       reader = new BufferedReader(new InputStreamReader(System.in));
 
@@ -110,7 +113,7 @@ public class Client {
 
       if (this.printSplash = true);
       {
-        System.out.print(helper.formatSplash(this.user));
+        outputText(null, null);
       }
       loop(helper, reader);
     } catch (Exception ex) {
@@ -125,12 +128,26 @@ public class Client {
     }
   }
 
+  public void outputText(String draftTag, List<String> draftLines)
+  {
+      if (state.equals("Main")) {
+        System.out.print(helper.formatMainMenuPrompt());
+      } 
+      else if(state.equals("Drafting")) 
+      {  // state = "Drafting"
+        System.out.print(helper.formatDraftingMenuPrompt(draftTag, draftLines));
+      }
+      else
+      {
+        System.out.print(helper.formatSplash(user));
+      }
+  }
 // Main loop: print user options, read user input and process
   void loop(CLFormatter helper, BufferedReader reader) throws IOException,
       ClassNotFoundException {
 
     // The app is in one of two states: "Main" or "Drafting"
-    String state = "Main";  // Initial state
+    state = "Main";  // Initial state
 
     // Holds the current draft data when in the "Drafting" state
     String draftTag = null;
@@ -140,13 +157,8 @@ public class Client {
     for (boolean done = false; !done;) {
 
       // Print user options
-      if (state.equals("Main")) {
-        System.out.print(helper.formatMainMenuPrompt());
-      } else {  // state = "Drafting"
-        System.out.print(helper.
-            formatDraftingMenuPrompt(draftTag, draftLines));
-      }
-
+      outputText(draftTag, draftLines);
+      
       // Read a line of user input
       String raw = reader.readLine();
       if (raw == null) {
