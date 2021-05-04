@@ -38,19 +38,19 @@ public class CLFormatter {
         + " read [mytag] => re [mytag]\n";
   }
 
-  static String formatMainMenuPrompt() {
-    return "\n[Main] Enter command: "
-        + "read [mytag], "
+  static String formatMainMenuPrompt(ResourceBundle messages) {
+    return "\n["+messages.getString("Main")+"] " + messages.getString("Enter")
+        + " read [mytag], "
         + "manage [mytag], "
         + "show, "    
         + "exit"
         + "\n> ";
   }
 
-  static String formatDraftingMenuPrompt(String tag, List<String> lines) {
-    return "\nDrafting: " + formatDrafting(tag, lines)
-        + "\n[Drafting] Enter command: "
-        + "line [mytext], "
+  static String formatDraftingMenuPrompt(String tag, List<String> lines, ResourceBundle messages) {
+    return "\n"+messages.getString("Drafting")+": " + formatDrafting(tag, lines)
+        + "\n["+messages.getString("Drafting")+"] "+ messages.getString("Enter")
+        + " line [mytext], "
         + "push, "
         + "discard, "
         + "undo, "    

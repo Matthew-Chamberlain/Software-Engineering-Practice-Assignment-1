@@ -125,7 +125,7 @@ public class Client {
       reader = new BufferedReader(new InputStreamReader(System.in));
 
       if (this.user.isEmpty() || this.host.isEmpty()) {
-        System.err.println("User/host has not been set.");
+        System.err.println(messages.getString("User/Host_Error"));
         System.exit(1);
       }
       helper = new CLFormatter(this.host, this.port);
@@ -150,11 +150,11 @@ public class Client {
   public void outputText(String draftTag, List<String> draftLines)
   {
       if (state.equals("Main")) {
-        System.out.print(helper.formatMainMenuPrompt());
+        System.out.print(helper.formatMainMenuPrompt(messages));
       } 
       else if(state.equals("Drafting")) 
       {  // state = "Drafting"
-        System.out.print(helper.formatDraftingMenuPrompt(draftTag, draftLines));
+        System.out.print(helper.formatDraftingMenuPrompt(draftTag, draftLines, messages));
       }
       else
       {
@@ -166,7 +166,7 @@ public class Client {
   {
       String raw = reader.readLine();
       if (raw == null) {
-        throw new IOException("Input stream closed while reading.");
+        throw new IOException(messages.getString("IOException"));
       }
       return Arrays.stream(raw.trim().split("\\ ")).map(x -> x.trim()).collect(Collectors.toList());
     
@@ -229,7 +229,7 @@ public class Client {
         }
         else 
         {
-          System.out.println("Could not parse command/args.");
+          System.out.println(messages.getString("Command_Input_Error"));
         }
         
       } // "Drafting" state commands
@@ -264,13 +264,13 @@ public class Client {
         
         else 
         {
-          System.out.println("Could not parse command/args.");
+          System.out.println(messages.getString("Command_Input_Error"));
         }
         
       } 
       else 
       {
-        System.out.println("Could not parse command/args.");
+        System.out.println(messages.getString("Command_Input_Error"));
       }
     }
   }
