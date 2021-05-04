@@ -49,6 +49,7 @@ public class CLFormatter {
         + "line [mytext], "
         + "push, "
         + "discard, "
+        + "undo, "    
         + "exit"
         + "\n> ";
   }

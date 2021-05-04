@@ -231,6 +231,11 @@ public class Client {
             state = "Main";
         }
         
+        else if("undo".startsWith(cmd))
+        {
+            draftLines.remove(draftLines.size()-1);
+        }
+        
         else 
         {
           System.out.println("Could not parse command/args.");
