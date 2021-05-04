@@ -142,6 +142,16 @@ public class Client {
         System.out.print(helper.formatSplash(user));
       }
   }
+  
+  public List<String> inputText() throws IOException
+  {
+      String raw = reader.readLine();
+      if (raw == null) {
+        throw new IOException("Input stream closed while reading.");
+      }
+      return Arrays.stream(raw.trim().split("\\ ")).map(x -> x.trim()).collect(Collectors.toList());
+    
+  }
 // Main loop: print user options, read user input and process
   void loop(CLFormatter helper, BufferedReader reader) throws IOException,
       ClassNotFoundException {
@@ -154,19 +164,16 @@ public class Client {
     List<String> draftLines = new LinkedList<>();
 
     // The loop
-    for (boolean done = false; !done;) {
+    boolean done = false;
+    while(!done) {
 
       // Print user options
       outputText(draftTag, draftLines);
       
       // Read a line of user input
-      String raw = reader.readLine();
-      if (raw == null) {
-        throw new IOException("Input stream closed while reading.");
-      }
+      
       // Trim leading/trailing white space, and split words according to spaces
-      List<String> split = Arrays.stream(raw.trim().split("\\ "))
-          .map(x -> x.trim()).collect(Collectors.toList());
+      List<String> split = inputText();
       String cmd = split.remove(0);  // First word is the command keyword
       String[] rawArgs = split.toArray(new String[split.size()]);
       // Remainder, if any, are arguments
