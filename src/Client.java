@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import sep.tinee.net.message.Bye;
 import sep.tinee.net.message.Push;
@@ -80,8 +82,9 @@ public class Client {
   private CLFormatter helper;
   private BufferedReader reader;
   boolean printSplash = true;
+  private ResourceBundle messages;
 
-  Client(String user, String host, int port) 
+  Client(String user, String host, int port, String language, String country) 
   {
     this.user = user;
     this.host = host;
@@ -89,13 +92,27 @@ public class Client {
     state = "";
     BufferedReader reader = null;
     CLFormatter helper = null;
+    Locale locale = new Locale(language, country);
+    messages = ResourceBundle.getBundle("resources/MessageBundle", locale);
   }
 
   public static void main(String[] args) throws IOException {
+    String language;
+    String country;
     String user = args[0];
     String host = args[1];
     int port = Integer.parseInt(args[2]);
-    Client client = new Client(user, host, port);
+    if(args.length != 5)
+    {
+        language = new String("en");
+        country = new String("GB");
+    }
+    else
+    {
+        language = args[3];
+        country = args[4];
+    } 
+    Client client = new Client(user, host, port, language, country);
     client.run();
   }
   // Run the client
@@ -141,7 +158,7 @@ public class Client {
       }
       else
       {
-        System.out.print(helper.formatSplash(user));
+        System.out.print(helper.formatSplash(user, messages));
       }
   }
   

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import sep.tinee.net.channel.ClientChannel;
 import sep.tinee.net.message.Message;
 
@@ -31,10 +32,10 @@ public class CLFormatter {
 
   /* Following are the auxiliary methods for formatting the UI text */
 
-  static String formatSplash(String user) {
-    return "\nHello " + user + "!\n"
-        + "Note:  Commands can be abbreviated to any prefix, "
-        + "e.g., read [mytag] => re [mytag]\n";
+  static String formatSplash(String user, ResourceBundle messages) {
+    return "\n" + messages.getString("Welcome") + " " + user + "!\n"
+        + messages.getString("Welcome_Note")
+        + " read [mytag] => re [mytag]\n";
   }
 
   static String formatMainMenuPrompt() {
