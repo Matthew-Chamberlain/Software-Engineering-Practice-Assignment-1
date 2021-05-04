@@ -153,7 +153,7 @@ public class Client {
     
   }
 // Main loop: print user options, read user input and process
-  void loop(CLFormatter helper, BufferedReader reader) throws IOException,
+  private void loop(CLFormatter helper, BufferedReader reader) throws IOException,
       ClassNotFoundException {
 
     // The app is in one of two states: "Main" or "Drafting"
@@ -179,44 +179,68 @@ public class Client {
       // Remainder, if any, are arguments
 
       // Process user input
-      if ("exit".startsWith(cmd)) {
+      if ("exit".startsWith(cmd)) 
+      {
         // exit command applies in either state
         done = true;
       } // "Main" state commands
-      else if (state.equals("Main")) {
-        if ("manage".startsWith(cmd)) {
+      else if (state.equals("Main")) 
+      {
+        if ("manage".startsWith(cmd)) 
+        {
           // Switch to "Drafting" state and start a new "draft"
           state = "Drafting";
           draftTag = rawArgs[0];
-        } else if ("read".startsWith(cmd)) {
+        } 
+        
+        else if ("read".startsWith(cmd)) 
+        {
           // Read tines on server
           helper.chan.send(new ReadRequest(rawArgs[0]));
           ReadReply rep = (ReadReply) helper.chan.receive();
           System.out.print(
               helper.formatRead(rawArgs[0], rep.users, rep.lines));
-        } else {
+        } 
+        else 
+        {
           System.out.println("Could not parse command/args.");
         }
+        
       } // "Drafting" state commands
-      else if (state.equals("Drafting")) {
+      else if (state.equals("Drafting")) 
+      {
         if ("line".startsWith(cmd)) {
           // Add a tine message line
           String line = Arrays.stream(rawArgs).
               collect(Collectors.joining());
           draftLines.add(line);
-        } else if ("push".startsWith(cmd)) {
+        } 
+        
+        else if ("push".startsWith(cmd)) 
+        {
           // Send drafted tines to the server, and go back to "Main" state
           helper.chan.send(new Push(user, draftTag, draftLines));
           draftLines.clear();
           state = "Main";
           draftTag = null;
-        } else {
+        } 
+        
+        else if("discard".startsWith(cmd))
+        {
+            draftLines.clear();
+            state = "Main";
+        }
+        
+        else 
+        {
           System.out.println("Could not parse command/args.");
         }
-      } else {
+        
+      } 
+      else 
+      {
         System.out.println("Could not parse command/args.");
       }
     }
-    return;
   }
 }
