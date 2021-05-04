@@ -77,24 +77,20 @@ public class Client {
 
   boolean printSplash = true;
 
-  Client() {
+  Client(String user, String host, int port) 
+  {
+      this.user = user;
+      this.host = host;
+      this.port = port;
   }
 
   public static void main(String[] args) throws IOException {
     String user = args[0];
     String host = args[1];
     int port = Integer.parseInt(args[2]);
-    Client client = new Client();
-    client.set(user, host, port);
+    Client client = new Client(user, host, port);
     client.run();
   }
-
-  public void set(String user, String host, int port) {
-    this.user = user;
-    this.host = host;
-    this.port = port;
-  }
-
   // Run the client
   @SuppressFBWarnings(
       value = "DM_DEFAULT_ENCODING",
