@@ -207,6 +207,7 @@ public class Client {
         } else if ("push".startsWith(cmd)) {
           // Send drafted tines to the server, and go back to "Main" state
           helper.chan.send(new Push(user, draftTag, draftLines));
+          draftLines.clear();
           state = "Main";
           draftTag = null;
         } else {
