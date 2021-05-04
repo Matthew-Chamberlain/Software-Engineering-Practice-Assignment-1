@@ -207,9 +207,27 @@ public class Client {
       {
         if ("manage".startsWith(cmd)) 
         {
-          // Switch to "Drafting" state and start a new "draft"
-          state = "Drafting";
-          draftTag = rawArgs[0];
+            helper.chan.send(new ReadRequest(rawArgs[0]));
+            ReadReply rep = (ReadReply) helper.chan.receive();
+            // Switch to "Drafting" state and start a new "draft"
+            if(rep.lines.size() > 0 )
+            {
+                if(!rep.lines.get(rep.lines.size()-1).equals("##CLOSE##"))
+                {
+                    state = "Drafting";
+                    draftTag = rawArgs[0];
+                }
+                else
+                {
+                    System.out.print("\nCannot edit a closed ticket\n");
+                }
+            }
+            else
+            {
+                state = "Drafting";
+                draftTag = rawArgs[0];
+            }
+            
         } 
         
         else if ("read".startsWith(cmd)) 
@@ -260,6 +278,37 @@ public class Client {
         else if("undo".startsWith(cmd))
         {
             draftLines.remove(draftLines.size()-1);
+        }
+        
+        else if("close".startsWith(cmd))
+        {
+            helper.chan.send(new ReadRequest(draftTag));
+            ReadReply rep = (ReadReply) helper.chan.receive();
+            if(rep.lines.size() > 0)
+            {
+                if(rep.users.get(0).equals(this.user))
+                {
+                    draftLines.add("##CLOSE##");
+                    helper.chan.send(new Push(user, draftTag, draftLines));
+                    draftLines.clear();
+                    state = "Main";
+                    draftTag = null;
+                }
+                else
+                {
+                    System.out.println("Only the original author can close a ticket");
+                }
+            }
+            else
+            {
+                draftLines.add("##CLOSE##");
+                helper.chan.send(new Push(user, draftTag, draftLines));
+                draftLines.clear();
+                state = "Main";
+                draftTag = null;
+            }
+            
+            
         }
         
         else 

@@ -54,6 +54,7 @@ public class CLFormatter {
         + "push, "
         + "discard, "
         + "undo, "    
+        + "close, "    
         + "exit"
         + "\n> ";
   }
