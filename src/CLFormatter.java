@@ -1,7 +1,9 @@
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import sep.tinee.net.channel.ClientChannel;
 import sep.tinee.net.message.Message;
 
@@ -39,6 +41,7 @@ public class CLFormatter {
     return "\n[Main] Enter command: "
         + "read [mytag], "
         + "manage [mytag], "
+        + "show, "    
         + "exit"
         + "\n> ";
   }
@@ -78,6 +81,22 @@ public class CLFormatter {
       b.append("  ");
       b.append(it.next());
     };
+    b.append("\n");
+    return b.toString();
+  }
+  
+  static String formatShow(Map tags)
+    {
+    StringBuilder b = new StringBuilder("Show: ");
+    Iterator it = tags.entrySet().iterator();
+    while (it.hasNext()) 
+    {
+        Map.Entry pair = (Map.Entry)it.next();
+        b.append("\n");
+        b.append(String.format("%12s",pair.getKey()));
+        b.append("  ");
+        b.append(pair.getValue());
+    }
     b.append("\n");
     return b.toString();
   }

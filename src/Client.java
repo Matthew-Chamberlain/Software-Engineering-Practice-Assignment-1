@@ -11,6 +11,8 @@ import sep.tinee.net.message.Bye;
 import sep.tinee.net.message.Push;
 import sep.tinee.net.message.ReadReply;
 import sep.tinee.net.message.ReadRequest;
+import sep.tinee.net.message.ShowReply;
+import sep.tinee.net.message.ShowRequest;
 
 /**
  * This class is an initial work-in-progress prototype for a command line
@@ -200,7 +202,14 @@ public class Client {
           ReadReply rep = (ReadReply) helper.chan.receive();
           System.out.print(
               helper.formatRead(rawArgs[0], rep.users, rep.lines));
-        } 
+        }
+        
+        else if ("show".startsWith(cmd))
+        {
+            helper.chan.send(new ShowRequest());
+            ShowReply rep = (ShowReply) helper.chan.receive();
+            System.out.print(helper.formatShow(rep.tags));
+        }
         else 
         {
           System.out.println("Could not parse command/args.");
