@@ -75,168 +75,180 @@ import sep.tinee.net.message.ShowRequest;
  */
 public class Client {
 
-  String user;
-  String host;
-  int port;
-  String state;
-  private CLFormatter helper;
-  private BufferedReader reader;
-  boolean printSplash = true;
-  private ResourceBundle messages;
+    String user;
+    String host;
+    int port;
+    String state;
+    private CLFormatter helper;
+    private BufferedReader reader;
+    boolean printSplash = true;
+    private ResourceBundle messages;
 
-  Client(String user, String host, int port, String language, String country) 
-  {
-    this.user = user;
-    this.host = host;
-    this.port = port;
-    state = "";
-    BufferedReader reader = null;
-    CLFormatter helper = null;
-    Locale locale = new Locale(language, country);
-    messages = ResourceBundle.getBundle("resources/MessageBundle", locale);
-  }
-
-  public static void main(String[] args) throws IOException {
-    String language;
-    String country;
-    String user = args[0];
-    String host = args[1];
-    int port = Integer.parseInt(args[2]);
-    if(args.length != 5)
+    Client(String user, String host, int port, String language, String country) 
     {
-        language = new String("en");
-        country = new String("GB");
+        this.user = user;
+        this.host = host;
+        this.port = port;
+        state = "";
+        BufferedReader reader = null;
+        CLFormatter helper = null;
+        Locale locale = new Locale(language, country);
+        messages = ResourceBundle.getBundle("resources/MessageBundle", locale);
     }
-    else
-    {
-        language = args[3];
-        country = args[4];
-    } 
-    Client client = new Client(user, host, port, language, country);
-    client.run();
-  }
-  // Run the client
-  @SuppressFBWarnings(
-      value = "DM_DEFAULT_ENCODING",
-      justification = "When reading console, ignore 'default encoding' warning")
-  void run() throws IOException {
 
-    try {
-      reader = new BufferedReader(new InputStreamReader(System.in));
-
-      if (this.user.isEmpty() || this.host.isEmpty()) {
-        System.err.println(messages.getString("User/Host_Error"));
-        System.exit(1);
-      }
-      helper = new CLFormatter(this.host, this.port);
-
-      if (this.printSplash = true);
-      {
-        outputText(null, null);
-      }
-      loop(helper, reader);
-    } catch (Exception ex) {
-      throw new RuntimeException(ex);
-    } finally {
-      reader.close();
-      if (helper.chan.isOpen()) {
-        // If the channel is open, send Bye and close
-        helper.chan.send(new Bye());
-        helper.chan.close();
-      }
-    }
-  }
-
-  public void outputText(String draftTag, List<String> draftLines)
-  {
-      if (state.equals("Main")) {
-        System.out.print(helper.formatMainMenuPrompt(messages));
-      } 
-      else if(state.equals("Drafting")) 
-      {  // state = "Drafting"
-        System.out.print(helper.formatDraftingMenuPrompt(draftTag, draftLines, messages));
-      }
-      else
-      {
-        System.out.print(helper.formatSplash(user, messages));
-      }
-  }
-  
-  public List<String> inputText() throws IOException
-  {
-      String raw = reader.readLine();
-      if (raw == null) {
-        throw new IOException(messages.getString("IOException"));
-      }
-      return Arrays.stream(raw.trim().split("\\ ")).map(x -> x.trim()).collect(Collectors.toList());
-    
-  }
-// Main loop: print user options, read user input and process
-  private void loop(CLFormatter helper, BufferedReader reader) throws IOException,
-      ClassNotFoundException {
-
-    // The app is in one of two states: "Main" or "Drafting"
-    state = "Main";  // Initial state
-
-    // Holds the current draft data when in the "Drafting" state
-    String draftTag = null;
-    List<String> draftLines = new LinkedList<>();
-
-    // The loop
-    boolean done = false;
-    while(!done) {
-
-      // Print user options
-      outputText(draftTag, draftLines);
-      
-      // Read a line of user input
-      
-      // Trim leading/trailing white space, and split words according to spaces
-      List<String> split = inputText();
-      String cmd = split.remove(0);  // First word is the command keyword
-      String[] rawArgs = split.toArray(new String[split.size()]);
-      // Remainder, if any, are arguments
-
-      // Process user input
-      if ("exit".startsWith(cmd)) 
-      {
-        // exit command applies in either state
-        done = true;
-      } // "Main" state commands
-      else if (state.equals("Main")) 
-      {
-        if ("manage".startsWith(cmd)) 
+    public static void main(String[] args) throws IOException {
+        String language;
+        String country;
+        String user = args[0];
+        String host = args[1];
+        int port = Integer.parseInt(args[2]);
+        if(args.length != 5)
         {
-            helper.chan.send(new ReadRequest(rawArgs[0]));
-            ReadReply rep = (ReadReply) helper.chan.receive();
-            // Switch to "Drafting" state and start a new "draft"
-            if(rep.lines.size() > 0 )
+            language = new String("en");
+            country = new String("GB");
+        }
+        else
+        {
+            language = args[3];
+            country = args[4];
+        } 
+        Client client = new Client(user, host, port, language, country);
+        client.run();
+    }
+  // Run the client
+    @SuppressFBWarnings(
+        value = "DM_DEFAULT_ENCODING",
+        justification = "When reading console, ignore 'default encoding' warning")
+    void run() throws IOException {
+
+        try {
+            reader = new BufferedReader(new InputStreamReader(System.in));
+
+            if (this.user.isEmpty() || this.host.isEmpty()) 
             {
-                if(!rep.lines.get(rep.lines.size()-1).equals("##CLOSE##"))
+                System.err.println(messages.getString("User/Host_Error"));
+                System.exit(1);
+            }     
+            helper = new CLFormatter(this.host, this.port);
+
+            if (this.printSplash = true);
+            {
+                outputText(null, null);
+            }
+            loop(helper, reader);
+        } 
+        catch (Exception ex) 
+        {
+            throw new RuntimeException(ex);
+        } 
+        finally 
+        {
+            reader.close();
+            if (helper.chan.isOpen()) 
+            {
+                // If the channel is open, send Bye and close
+                helper.chan.send(new Bye());
+                helper.chan.close();
+            }
+        }
+    }
+
+    public void outputText(String draftTag, List<String> draftLines)
+    {
+        if (state.equals("Main")) {
+            System.out.print(helper.formatMainMenuPrompt(messages));
+        } 
+        else if(state.equals("Drafting")) 
+        {  // state = "Drafting"
+            System.out.print(helper.formatDraftingMenuPrompt(draftTag, draftLines, messages));
+        }
+        else
+        {
+            System.out.print(helper.formatSplash(user, messages));
+        }
+    }
+  
+    public List<String> inputText() throws IOException
+    {
+        String raw = reader.readLine();
+        if (raw == null) 
+        {
+            throw new IOException(messages.getString("IOException"));
+        }
+        return Arrays.stream(raw.trim().split("\\ ")).map(x -> x.trim()).collect(Collectors.toList());
+    
+    }
+    // Main loop: print user options, read user input and process
+    private void loop(CLFormatter helper, BufferedReader reader) throws IOException, ClassNotFoundException 
+    {
+
+        // The app is in one of two states: "Main" or "Drafting"
+        state = "Main";  // Initial state
+
+        // Holds the current draft data when in the "Drafting" state
+        String draftTag = null;
+        List<String> draftLines = new LinkedList<>();
+
+        // The loop
+        boolean done = false;
+        while(!done) {
+
+        // Print user options
+        outputText(draftTag, draftLines);
+      
+        // Read a line of user input
+        // Trim leading/trailing white space, and split words according to spaces
+        List<String> split = inputText();
+        String cmd = split.remove(0);  // First word is the command keyword
+        String[] rawArgs = split.toArray(new String[split.size()]);
+        // Remainder, if any, are arguments
+
+        // Process user input
+        if ("exit".startsWith(cmd)) 
+        {
+            // exit command applies in either state
+            done = true;
+        } // "Main" state commands
+        else if (state.equals("Main")) 
+        {
+            if ("manage".startsWith(cmd)) 
+            {
+                if(rawArgs.length == 0)
+                {
+                    continue;
+                }
+                helper.chan.send(new ReadRequest(rawArgs[0]));
+                ReadReply rep = (ReadReply) helper.chan.receive();
+                // Switch to "Drafting" state and start a new "draft"
+                if(rep.lines.size() > 0 )
+                {
+                    if(!rep.lines.get(rep.lines.size()-1).equals("##CLOSE##"))
+                    {
+                        state = "Drafting";
+                        draftTag = rawArgs[0];
+                    }
+                    else
+                    {
+                        System.out.print("\n"+messages.getString("Opening_Closed_Ticket_Error")+"\n");
+                    }
+                }
+                else
                 {
                     state = "Drafting";
                     draftTag = rawArgs[0];
                 }
-                else
-                {
-                    System.out.print("\n"+messages.getString("Opening_Closed_Ticket_Error")+"\n");
-                }
-            }
-            else
-            {
-                state = "Drafting";
-                draftTag = rawArgs[0];
-            }
-            
-        } 
+            } 
         
         else if ("read".startsWith(cmd)) 
         {
-          // Read tines on server
-          helper.chan.send(new ReadRequest(rawArgs[0]));
-          ReadReply rep = (ReadReply) helper.chan.receive();
-          System.out.print(
-              helper.formatRead(rawArgs[0], rep.users, rep.lines));
+            // Read tines on server
+            if(rawArgs.length == 0)
+            {
+                continue;
+            }
+            helper.chan.send(new ReadRequest(rawArgs[0]));
+            ReadReply rep = (ReadReply) helper.chan.receive();
+            System.out.print(helper.formatRead(rawArgs[0], rep.users, rep.lines));
         }
         
         else if ("show".startsWith(cmd))
@@ -247,26 +259,28 @@ public class Client {
         }
         else 
         {
-          System.out.println(messages.getString("Command_Input_Error"));
+            System.out.println(messages.getString("Command_Input_Error"));
         }
         
       } // "Drafting" state commands
+        
       else if (state.equals("Drafting")) 
       {
-        if ("line".startsWith(cmd)) {
-          // Add a tine message line
-          String line = Arrays.stream(rawArgs).
-              collect(Collectors.joining());
-          draftLines.add(line);
+        if ("line".startsWith(cmd)) 
+        {
+            // Add a tine message line
+            String line = Arrays.stream(rawArgs).
+            collect(Collectors.joining());
+            draftLines.add(line);
         } 
         
         else if ("push".startsWith(cmd)) 
         {
-          // Send drafted tines to the server, and go back to "Main" state
-          helper.chan.send(new Push(user, draftTag, draftLines));
-          draftLines.clear();
-          state = "Main";
-          draftTag = null;
+            // Send drafted tines to the server, and go back to "Main" state
+            helper.chan.send(new Push(user, draftTag, draftLines));
+            draftLines.clear();
+            state = "Main";
+            draftTag = null;
         } 
         
         else if("discard".startsWith(cmd))
@@ -314,8 +328,8 @@ public class Client {
         {
           System.out.println(messages.getString("Command_Input_Error"));
         }
-        
       } 
+      
       else 
       {
         System.out.println(messages.getString("Command_Input_Error"));
