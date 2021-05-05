@@ -219,7 +219,7 @@ public class Client {
                 }
                 else
                 {
-                    System.out.print("\nCannot edit a closed ticket\n");
+                    System.out.print("\n"+messages.getString("Opening_Closed_Ticket_Error")+"\n");
                 }
             }
             else
@@ -296,7 +296,7 @@ public class Client {
                 }
                 else
                 {
-                    System.out.println("Only the original author can close a ticket");
+                    System.out.print("\n"+messages.getString("Not_Original_Author_Error")+"\n");
                 }
             }
             else
@@ -307,7 +307,6 @@ public class Client {
                 state = "Main";
                 draftTag = null;
             }
-            
             
         }
         
