@@ -78,7 +78,6 @@ public class Client {
     String user;
     String host;
     int port;
-    String state;
     private CLFormatter helper;
     private BufferedReader reader;
     boolean printSplash = true;
@@ -89,9 +88,8 @@ public class Client {
         this.user = user;
         this.host = host;
         this.port = port;
-        state = "";
-        BufferedReader reader = null;
         CLFormatter helper = null;
+        BufferedReader reader = null;
         Locale locale = new Locale(language, country);
         messages = ResourceBundle.getBundle("resources/MessageBundle", locale);
     }
@@ -131,9 +129,9 @@ public class Client {
             }     
             helper = new CLFormatter(this.host, this.port);
 
-            if (this.printSplash = true);
+            if (this.printSplash == true);
             {
-                outputText(null, null);
+                System.out.print(helper.formatSplash(user, messages));
             }
             loop(helper, reader);
         } 
@@ -153,21 +151,6 @@ public class Client {
         }
     }
 
-    public void outputText(String draftTag, List<String> draftLines)
-    {
-        if (state.equals("Main")) {
-            System.out.print(helper.formatMainMenuPrompt(messages));
-        } 
-        else if(state.equals("Drafting")) 
-        {  // state = "Drafting"
-            System.out.print(helper.formatDraftingMenuPrompt(draftTag, draftLines, messages));
-        }
-        else
-        {
-            System.out.print(helper.formatSplash(user, messages));
-        }
-    }
-  
     public List<String> inputText() throws IOException
     {
         String raw = reader.readLine();
@@ -178,162 +161,44 @@ public class Client {
         return Arrays.stream(raw.trim().split("\\ ")).map(x -> x.trim()).collect(Collectors.toList());
     
     }
+    
+    public void outputText()
+    {
+        if(helper.getState().equals("Main"))
+        {
+            System.out.print(helper.formatMainMenuPrompt(messages));
+        }
+        else
+        {
+            System.out.print(helper.formatDraftingMenuPrompt(messages));
+        }
+    }
     // Main loop: print user options, read user input and process
     private void loop(CLFormatter helper, BufferedReader reader) throws IOException, ClassNotFoundException 
     {
 
         // The app is in one of two states: "Main" or "Drafting"
-        state = "Main";  // Initial state
+        helper.setState("Main");// Initial state
 
         // Holds the current draft data when in the "Drafting" state
-        String draftTag = null;
-        List<String> draftLines = new LinkedList<>();
-
+        
+        outputText();
         // The loop
-        boolean done = false;
-        while(!done) {
-
-        // Print user options
-        outputText(draftTag, draftLines);
-      
-        // Read a line of user input
-        // Trim leading/trailing white space, and split words according to spaces
         List<String> split = inputText();
         String cmd = split.remove(0);  // First word is the command keyword
         String[] rawArgs = split.toArray(new String[split.size()]);
-        // Remainder, if any, are arguments
+        //boolean done = false;
+        CommandChooser command = new CommandChooser(helper, user);
+        while(!"exits".startsWith(cmd)) 
+        {
 
-        // Process user input
-        if ("exit".startsWith(cmd)) 
-        {
-            // exit command applies in either state
-            done = true;
-        } // "Main" state commands
-        else if (state.equals("Main")) 
-        {
-            if ("manage".startsWith(cmd)) 
-            {
-                if(rawArgs.length == 0)
-                {
-                    continue;
-                }
-                helper.chan.send(new ReadRequest(rawArgs[0]));
-                ReadReply rep = (ReadReply) helper.chan.receive();
-                // Switch to "Drafting" state and start a new "draft"
-                if(rep.lines.size() > 0 )
-                {
-                    if(!rep.lines.get(rep.lines.size()-1).equals("##CLOSE##"))
-                    {
-                        state = "Drafting";
-                        draftTag = rawArgs[0];
-                    }
-                    else
-                    {
-                        System.out.print("\n"+messages.getString("Opening_Closed_Ticket_Error")+"\n");
-                    }
-                }
-                else
-                {
-                    state = "Drafting";
-                    draftTag = rawArgs[0];
-                }
-            } 
-        
-        else if ("read".startsWith(cmd)) 
-        {
-            // Read tines on server
-            if(rawArgs.length == 0)
-            {
-                continue;
-            }
-            helper.chan.send(new ReadRequest(rawArgs[0]));
-            ReadReply rep = (ReadReply) helper.chan.receive();
-            System.out.print(helper.formatRead(rawArgs[0], rep.users, rep.lines));
-        }
-        
-        else if ("show".startsWith(cmd))
-        {
-            helper.chan.send(new ShowRequest());
-            ShowReply rep = (ShowReply) helper.chan.receive();
-            System.out.print(helper.formatShow(rep.tags));
-        }
-        else 
-        {
-            System.out.println(messages.getString("Command_Input_Error"));
-        }
-        
-      } // "Drafting" state commands
-        
-      else if (state.equals("Drafting")) 
-      {
-        if ("line".startsWith(cmd)) 
-        {
-            // Add a tine message line
-            String line = Arrays.stream(rawArgs).
-            collect(Collectors.joining());
-            draftLines.add(line);
-        } 
-        
-        else if ("push".startsWith(cmd)) 
-        {
-            // Send drafted tines to the server, and go back to "Main" state
-            helper.chan.send(new Push(user, draftTag, draftLines));
-            draftLines.clear();
-            state = "Main";
-            draftTag = null;
-        } 
-        
-        else if("discard".startsWith(cmd))
-        {
-            draftLines.clear();
-            state = "Main";
-        }
-        
-        else if("undo".startsWith(cmd))
-        {
-            draftLines.remove(draftLines.size()-1);
-        }
-        
-        else if("close".startsWith(cmd))
-        {
-            helper.chan.send(new ReadRequest(draftTag));
-            ReadReply rep = (ReadReply) helper.chan.receive();
-            if(rep.lines.size() > 0)
-            {
-                if(rep.users.get(0).equals(this.user))
-                {
-                    draftLines.add("##CLOSE##");
-                    helper.chan.send(new Push(user, draftTag, draftLines));
-                    draftLines.clear();
-                    state = "Main";
-                    draftTag = null;
-                }
-                else
-                {
-                    System.out.print("\n"+messages.getString("Not_Original_Author_Error")+"\n");
-                }
-            }
-            else
-            {
-                draftLines.add("##CLOSE##");
-                helper.chan.send(new Push(user, draftTag, draftLines));
-                draftLines.clear();
-                state = "Main";
-                draftTag = null;
-            }
-            
-        }
-        
-        else 
-        {
-          System.out.println(messages.getString("Command_Input_Error"));
-        }
-      } 
+            // Print user options
+            command.getCommand(cmd, rawArgs, messages);
       
-      else 
-      {
-        System.out.println(messages.getString("Command_Input_Error"));
-      }
+            outputText();  
+            split = inputText();
+            cmd = split.remove(0);  // First word is the command keyword
+            rawArgs = split.toArray(new String[split.size()]);
+        }
     }
-  }
 }

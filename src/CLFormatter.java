@@ -2,6 +2,7 @@
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -15,6 +16,9 @@ import sep.tinee.net.message.Message;
 public class CLFormatter {
 
   static ClientChannel chan;  // Client-side channel for talking to a Tinee server
+  private static String draftTag = null;
+  private static List<String> draftLines = new LinkedList<>();
+  private String state;
 
   CLFormatter(String host, int port) {
     this.chan = new ClientChannel(host, port);
@@ -47,8 +51,8 @@ public class CLFormatter {
         + "\n> ";
   }
 
-  static String formatDraftingMenuPrompt(String tag, List<String> lines, ResourceBundle messages) {
-    return "\n"+messages.getString("Drafting")+": " + formatDrafting(tag, lines)
+  static String formatDraftingMenuPrompt(ResourceBundle messages) {
+    return "\n"+messages.getString("Drafting")+": " + formatDrafting()
         + "\n["+messages.getString("Drafting")+"] "+ messages.getString("Enter")
         + " line [mytext], "
         + "push, "
@@ -59,11 +63,11 @@ public class CLFormatter {
         + "\n> ";
   }
 
-  static String formatDrafting(String tag, List<String> lines) {
+  static String formatDrafting() {
     StringBuilder b = new StringBuilder("#");
-    b.append(tag);
+    b.append(draftTag);
     int i = 1;
-    for (String x : lines) {
+    for (String x : draftLines) {
       b.append("\n");
       b.append(String.format("%12d", i++));
       b.append("  ");
@@ -101,5 +105,45 @@ public class CLFormatter {
     }
     b.append("\n");
     return b.toString();
+  }
+  
+  public String getDraftTag()
+  {
+      return draftTag;
+  }
+  
+  public void setDraftTag(String tag)
+  {
+      draftTag = tag;
+  }
+  
+  public List<String> getDraftLines()
+  {
+      return draftLines;
+  }
+  
+  public void addDraftLines(String line)
+  {
+      draftLines.add(line);
+  }
+  
+  public void removeDraftLines(int line)
+  {
+      draftLines.remove(line);
+  }
+  
+  public void clearDraftLines()
+  {
+      draftLines.clear();
+  }
+  
+  public String getState()
+  {
+      return state;
+  }
+  
+  public void setState(String state )
+  {
+      this.state = state;
   }
 }
